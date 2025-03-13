@@ -1,7 +1,10 @@
 package com.example.expense.controller.users;
 
+import com.example.expense.entity.Users;
 import com.example.expense.model.users.RegisterUser;
 import com.example.expense.model.users.UserDetail;
+import com.example.expense.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,23 +14,18 @@ import java.util.HashMap;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    HashMap<String, UserDetail> map = new HashMap<>();
+    @Autowired
+    UserService userService;
 
     @PostMapping("/login")
-    public UserDetail loginUser(@RequestBody UserDetail userDetail) {
-        return map.get(userDetail.getUserName());
+    public Users loginUser(@RequestBody UserDetail userDetail) {
+        return userService.getUser(userDetail.getUserName());
+
     }
 
     @PostMapping("/signup")
     public ResponseEntity<RegisterUser> registerUser(@RequestBody RegisterUser registerUser) {
-        if (map.containsKey(registerUser.getUserName())) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        map.put(registerUser.getUserName(), UserDetail.builder()
-                .userName(registerUser.getUserName())
-                .password(registerUser.getPassword()).build());
-
+        userService.storeUser(registerUser);
         return ResponseEntity.ok(registerUser);
     }
 
