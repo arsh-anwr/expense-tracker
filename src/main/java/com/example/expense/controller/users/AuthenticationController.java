@@ -17,15 +17,15 @@ public class AuthenticationController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public Users loginUser(@RequestBody UserDetail userDetail) {
-        return userService.getUser(userDetail.getUserName());
+        return userService.getUser(userDetail);
 
     }
 
     @PostMapping("/signup")
     public ResponseEntity<RegisterUser> registerUser(@RequestBody RegisterUser registerUser) {
-        userService.storeUser(registerUser);
+        userService.storeNewUser(registerUser);
         return ResponseEntity.ok(registerUser);
     }
 
