@@ -50,6 +50,10 @@ public class UserService {
 
         Users users = userRepository.findByUserName(userDetail.getUserName());
 
+        if (users == null) {
+            return null;
+        }
+
         try {
             if (encryptionUtils.verifyPassword(userDetail.getPassword(), users.getSalt(), users.getPassword())) {
                 return users;
