@@ -2,6 +2,7 @@ package com.example.expense.services;
 
 import com.example.expense.entity.Users;
 import com.example.expense.model.enums.RoleEnum;
+import com.example.expense.model.google.GoogleProfileResponse;
 import com.example.expense.model.users.RegisterUser;
 import com.example.expense.model.users.UserDetail;
 import com.example.expense.repository.RoleRepository;
@@ -46,6 +47,17 @@ public class UserService {
         }
     }
 
+    public void storeNewGoogleUser(GoogleProfileResponse googleProfileResponse) {
+        Users users = Users.builder()
+                .userName(googleProfileResponse.getEmail())
+                .salt("")
+                .password("")
+                .fullName(googleProfileResponse.getName())
+                .roles(List.of(roleRepository.findByName(RoleEnum.USER).get()))
+                .build();
+        userRepository.save(users);
+    }
+
     public Users getUser(UserDetail userDetail) {
 
         Users users = userRepository.findByUserName(userDetail.getUserName());
@@ -65,5 +77,9 @@ public class UserService {
             return null;
         }
 
+    }
+
+    public Users getUser(String userName) {
+        return userRepository.findByUserName(userName);
     }
 }

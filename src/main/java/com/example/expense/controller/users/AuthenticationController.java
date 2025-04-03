@@ -2,18 +2,13 @@ package com.example.expense.controller.users;
 
 import com.example.expense.entity.RefreshTokens;
 import com.example.expense.entity.Users;
-import com.example.expense.model.users.RefreshTokenRequest;
-import com.example.expense.model.users.RegisterUser;
-import com.example.expense.model.users.UserDetail;
-import com.example.expense.model.users.UserLoginResponse;
-import com.example.expense.services.JwtService;
-import com.example.expense.services.RefreshTokenService;
-import com.example.expense.services.SignedUpUserDetailsService;
-import com.example.expense.services.UserService;
+import com.example.expense.model.enums.LoginType;
+import com.example.expense.model.google.GoogleProfileResponse;
+import com.example.expense.model.users.*;
+import com.example.expense.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,10 +25,17 @@ public class AuthenticationController {
     RefreshTokenService refreshTokenService;
 
     @Autowired
+    GoogleService googleService;
+
+    @Autowired
     SignedUpUserDetailsService signedUpUserDetailsService;
 
-    @GetMapping("/login")
-    public ResponseEntity<UserLoginResponse> loginUser(@RequestBody UserDetail userDetail) {
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponse> loginUser(@RequestBody LoginUserDTO userDetail) {
+
+        if (userDetail.getLoginType().equals(LoginType.GOOGLE)) {
+            return googleLoginUser(userDetail);
+        }
 
         Users user = userService.getUser(userDetail);
 
@@ -50,6 +52,30 @@ public class AuthenticationController {
                         .timeout(jwtService.getExpirationTime())
                         .timeoutType("Milisecond")
                         .refreshToken(refreshToken.getRefreshToken())
+                .build());
+    }
+
+    private ResponseEntity<UserLoginResponse> googleLoginUser(LoginUserDTO userDetail) {
+
+        String googleAuthToken = googleService.getGoogleAuth(userDetail);
+        GoogleProfileResponse googleProfileResponse = googleService.getProfileDetailsGoogle(googleAuthToken);
+
+        Users user = userService.getUser(googleProfileResponse.getEmail());
+
+        if (user == null) {
+            userService.storeNewGoogleUser(googleProfileResponse);
+            user = userService.getUser(googleProfileResponse.getEmail());
+        }
+
+
+        String accessToken = jwtService.generateToken(user);
+        RefreshTokens refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
+        return ResponseEntity.ok(UserLoginResponse.builder()
+                .accessToken(accessToken)
+                .timeout(jwtService.getExpirationTime())
+                .timeoutType("Milisecond")
+                .refreshToken(refreshToken.getRefreshToken())
                 .build());
     }
 
@@ -83,6 +109,12 @@ public class AuthenticationController {
                 .timeoutType("Milisecond")
                 .refreshToken(newRefreshToken.getRefreshToken())
                 .build());
+    }
+
+
+    @GetMapping("/glogin")
+    public  ResponseEntity<?> gmailLogin(@RequestParam("code") String code, @RequestParam("scope") String scope) {
+        return ResponseEntity.ok("Token Generated");
     }
 
 }
