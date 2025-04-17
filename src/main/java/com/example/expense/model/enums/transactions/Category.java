@@ -1,0 +1,28 @@
+package com.example.expense.model.enums.transactions;
+
+public enum Category {
+    GROCERIES,
+    RENT,
+    UTILITIES,
+    TRANSPORTATION,
+    FOOD_AND_DINING,
+    ENTERTAINMENT,
+    HEALTHCARE,
+    EDUCATION,
+    SUBSCRIPTIONS,
+    INSURANCE,
+    INVESTMENTS,
+    SAVINGS,
+    SHOPPING,
+    TRAVEL,
+    PERSONAL_CARE,
+    MOBILE_AND_INTERNET,
+    TAXES,
+    LOANS_AND_EMIS,
+    GIFTS_AND_DONATIONS,
+    PET_CARE,
+    BUSINESS_EXPENSES,
+    HOME_MAINTENANCE,
+    CHILD_CARE,
+    MISCELLANEOUS;
+}
